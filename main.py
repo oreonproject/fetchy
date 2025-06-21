@@ -152,8 +152,8 @@ class MainWindow(QWidget):
             print("Nothing to install.")
             return
 
-        with open(script_path, "w") as f:
-            f.write("\n".join(lines) + "\n")
+        with open(script_path, "w") as file:
+            file.write("\n".join(lines) + "\n")
         os.chmod(script_path, 0o755)
 
         print(f"Script written to {script_path}. Launching with pkexec...")
