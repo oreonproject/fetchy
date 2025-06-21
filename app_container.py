@@ -17,6 +17,7 @@
 from PyQt5.QtWidgets import QVBoxLayout, QStackedWidget, QWidget
 
 from pages.base import MainWindow
+from pages.development import DevelopmentWindow
 from pages.games import GamesWindow
 
 
@@ -38,7 +39,8 @@ class AppContainer(QWidget):
                 ("media/logos/browsers/vivaldi.png", "Vivaldi"),
                 ("media/logos/browsers/zen.png", "Zen")
             ]),
-            GamesWindow()
+            GamesWindow(),
+            DevelopmentWindow()
         ]
 
         for page in self.pages:

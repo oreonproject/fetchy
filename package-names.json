@@ -23,5 +23,57 @@
   },
   "Zen": {
     "flathub": "app.zen_browser.zen"
+  },
+  "Steam": {
+    "flathub": "com.valvesoftware.Steam"
+  },
+  "Lutris": {
+    "flathub": "net.lutris.Lutris"
+  },
+  "Heroic": {
+    "flathub": "com.heroicgameslauncher.hgl"
+  },
+  "VSCode": {
+    "flathub": "com.visualstudio.code"
+  },
+  "VSCodium": {
+    "flathub": "com.vscodium.codium"
+  },
+  "IntelliJ community": {
+    "flathub": "com.jetbrains.IntelliJ-IDEA-Community"
+  },
+  "IntelliJ ultimate": {
+    "flathub": "com.jetbrains.IntelliJ-IDEA-Ultimate"
+  },
+  "Pycharm community": {
+    "flathub": "com.jetbrains.PyCharm-Community"
+  },
+  "Pycharm professional": {
+    "flathub": "com.jetbrains.PyCharm-Professional"
+  },
+  "CLion": {
+    "flathub": "com.jetbrains.CLion"
+  },
+  "Rider": {
+    "flathub": "com.jetbrains.Rider"
+  },
+  "WebStorm": {
+    "flathub": "com.jetbrains.WebStorm"
+  },
+  "PHPStorm": {
+    "flathub": "com.jetbrains.PhpStorm"
+  },
+  "DataGrip": {
+    "flathub": "com.jetbrains.DataGrip"
+  },
+  "RustRover": {
+    "flathub": "com.jetbrains.RustRover"
+  },
+  "GOLand": {
+    "flathub": "com.jetbrains.GoLand"
+  },
+  "RubyMine": {
+    "flathub": "com.jetbrains.RubyMine"
   }
+
 }
