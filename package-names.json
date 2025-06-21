@@ -1,0 +1,20 @@
+{
+  "LibreWolf": {
+    "dnf": "librewolf",
+    "flathub": "io.gitlab.librewolf-community"
+  },
+  "Firefox": {
+    "dnf": "firefox",
+    "flathub": "org.mozilla.firefox"
+  },
+  "Brave": {
+    "flathub": "com.brave.Browser"
+  },
+  "Chromium": {
+    "dnf": "chromium",
+    "flathub": "org.chromium.Chromium"
+  },
+  "Chrome": {
+    "dnf": "google-chrome-stable"
+  }
+}

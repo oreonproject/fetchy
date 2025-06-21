@@ -23,5 +23,6 @@ pkgs.mkShell {
     export QT_QPA_PLATFORM_PLUGIN_PATH=${pkgs.qt5.qtbase.bin}/lib/qt-5/plugins/platforms
     export QT_QPA_PLATFORM=wayland
     echo dev enviroment ready!
+    alias run="python3 main.py"
   '';
 }

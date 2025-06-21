@@ -13,22 +13,249 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+import json
+import os
+import subprocess
 
-# main.py
-
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLabel, QFrame, QVBoxLayout, QScrollArea,
+    QHBoxLayout, QComboBox, QPushButton, QDialog, QTextEdit
+)
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow
 
-class MainWindow(QMainWindow):
+
+class Card(QFrame):
+    def __init__(self, image_path, title, repo, click_handler=None):
+        super().__init__()
+        self.title = title
+        self.repo = repo
+        self.selected = False
+        self.click_handler = click_handler
+
+        self.setFrameShape(QFrame.Box)
+        self.setLineWidth(1)
+        self.setFixedSize(450, 200)
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 5, 5, 5)
+        layout.setSpacing(10)
+
+        self.blue_bar = QWidget()
+        self.blue_bar.setFixedWidth(5)
+        self.blue_bar.setStyleSheet("background-color: blue;")
+        self.blue_bar.hide()
+        layout.addWidget(self.blue_bar)
+
+        pixmap = QPixmap(image_path)
+        if pixmap.isNull():
+            print(f"Error loading image: {image_path}")
+        else:
+            pixmap = pixmap.scaled(
+                140, 140,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+
+        self.image_label = QLabel()
+        self.image_label.setPixmap(pixmap)
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.image_label)
+
+        self.title_label = QLabel(title)
+        self.title_label.setStyleSheet("font-weight: bold")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.title_label)
+
+        self.setLayout(layout)
+
+    def mousePressEvent(self, event):
+        if self.click_handler and self.isEnabled():
+            self.click_handler(self)
+
+    def set_selected(self, selected: bool):
+        self.selected = selected
+        self.update_style()
+
+    def update_style(self):
+        self.blue_bar.setVisible(self.selected)
+
+    def set_enabled(self, enabled: bool):
+        self.setEnabled(enabled)
+        if enabled:
+            self.title_label.setStyleSheet("font-weight: bold; color: black;")
+            self.image_label.setGraphicsEffect(None)
+        else:
+            self.title_label.setStyleSheet("font-weight: bold; color: gray;")
+            from PyQt5.QtWidgets import QGraphicsOpacityEffect
+            opacity_effect = QGraphicsOpacityEffect()
+            opacity_effect.setOpacity(0.4)
+            self.image_label.setGraphicsEffect(opacity_effect)
+
+
+with open("package-names.json", "r") as f:
+    data = json.load(f)
+
+def get_package_info(packagename):
+    return data.get(packagename)
+
+
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Fetchy")
 
-def main():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())
+        main_layout = QVBoxLayout(self)
 
+        title_label = QLabel("Browsers")
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
+        main_layout.addWidget(title_label)
+
+        self.repo_selector = QComboBox()
+        self.repo_selector.addItems(["dnf", "flathub"])
+        self.repo_selector.currentTextChanged.connect(self.load_cards)
+        main_layout.addWidget(self.repo_selector)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        main_layout.addWidget(self.scroll_area)
+
+        self.container = QWidget()
+        self.scroll_area.setWidget(self.container)
+
+        self.vbox_layout = QVBoxLayout(self.container)
+        self.vbox_layout.setContentsMargins(10, 10, 10, 10)
+        self.vbox_layout.setSpacing(10)
+
+        self.cards_info = [
+            ("media/logos/browsers/librewolf.png", "LibreWolf"),
+            ("media/logos/browsers/firefox.png", "Firefox"),
+            ("media/logos/browsers/chromium.png", "Chromium"),
+            ("media/logos/browsers/chromium.png", "Ungoogled Chromium"),
+            ("media/logos/browsers/chrome.png", "Chrome"),
+            ("media/logos/browsers/brave.png", "Brave"),
+        ]
+
+        self.selected_cards = {
+            "dnf": set(),
+            "flathub": set()
+        }
+
+        self.cards_by_repo = {
+            "dnf": [],
+            "flathub": []
+        }
+
+        install_button = QPushButton("Install")
+        install_button.clicked.connect(self.install)
+        main_layout.addWidget(install_button)
+
+        self.load_cards("dnf")
+
+    def load_cards(self, repo):
+        for i in reversed(range(self.vbox_layout.count())):
+            widget = self.vbox_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        self.cards_by_repo[repo] = []
+
+        for img, title in self.cards_info:
+            card = Card(img, title, repo, click_handler=self.card_clicked)
+
+            package_info = get_package_info(title)
+            available = bool(package_info and repo in package_info)
+            card.set_enabled(available)
+
+            card.set_selected(title in self.selected_cards[repo])
+            self.vbox_layout.addWidget(card)
+            self.cards_by_repo[repo].append(card)
+
+        self.vbox_layout.addStretch()
+
+    def card_clicked(self, clicked_card):
+        repo = clicked_card.repo
+        title = clicked_card.title
+
+        if clicked_card.selected:
+            clicked_card.set_selected(False)
+            self.selected_cards[repo].discard(title)
+        else:
+            if clicked_card.isEnabled():
+                clicked_card.set_selected(True)
+                self.selected_cards[repo].add(title)
+
+        print(f"Repository: {repo}")
+        print("Selected cards:")
+        for r in self.selected_cards:
+            for name in self.selected_cards[r]:
+                print(f" - {name} ({r})")
+
+    def install(self):
+        print("Install started!")
+
+        script_path = os.path.abspath("fetchy.sh")
+        lines = ["#!/bin/bash\n"]
+
+        for repo in self.selected_cards:
+            for title in self.selected_cards[repo]:
+                package_info = get_package_info(title)
+                if package_info:
+                    package_name = package_info.get(repo)
+                    if package_name:
+                        if repo == "flathub":
+                            lines.append(f"flatpak install -y flathub {package_name}")
+                        elif repo == "dnf":
+                            lines.append(f"dnf install -y {package_name}")
+                        print(f" - Queued: {title} ({repo}) -> {package_name}")
+                    else:
+                        print(f" - {title} has no {repo} entry.")
+                else:
+                    print(f" - No package info found for {title}")
+
+        if len(lines) == 1:
+            print("Nothing to install.")
+            return
+
+        with open(script_path, "w") as f:
+            f.write("\n".join(lines) + "\n")
+        os.chmod(script_path, 0o755)
+
+        print(f"Script written to {script_path}. Launching with pkexec...")
+
+        # Show output in PyQt dialog
+        dlg = InstallDialog(script_path)
+        dlg.exec_()
+
+class InstallDialog(QDialog):
+    def __init__(self, script_path):
+        super().__init__()
+        self.setWindowTitle("Installing Packages")
+        self.resize(600, 400)
+
+        layout = QVBoxLayout(self)
+        self.output_box = QTextEdit()
+        self.output_box.setReadOnly(True)
+        layout.addWidget(self.output_box)
+
+        self.run_script(script_path)
+
+    def run_script(self, script_path):
+        try:
+            result = subprocess.run(
+                ["pkexec", "bash", script_path],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            self.output_box.append("✅ Success:\n" + result.stdout)
+        except subprocess.CalledProcessError as e:
+            self.output_box.append("❌ Error:\n" + e.stderr)
 
 if __name__ == "__main__":
-    main()
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.showFullScreen()
+    sys.exit(app.exec_())

@@ -1,6 +1,7 @@
 # created by virtualenv automatically
 .venv/bin
 
+fetchy.sh
 
 ### JetBrains ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -12,6 +13,8 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+
+.idea/
 
 # AWS User-specific
 .idea/**/aws.xml
