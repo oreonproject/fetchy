@@ -13,21 +13,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-import json
-import os
-import sys
-
-from PyQt5.QtWidgets import (
-    QApplication, QWidget, QLabel, QVBoxLayout, QScrollArea,
-    QComboBox, QPushButton
-)
-from PyQt5.QtCore import Qt
-
-from app_container import AppContainer
+from pages.base import MainWindow
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    container = AppContainer()
-    container.showFullScreen()
-    sys.exit(app.exec_())
+class GamesWindow(MainWindow):
+    def __init__(self):
+        super().__init__("Games", "Games", [
+            ("media/logos/games/steam.png", "Steam"),
+            ("media/logos/games/lutris.png", "Lutris"),
+            ("media/logos/games/heroic.png", "Heroic"),
+        ])

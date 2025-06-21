@@ -1,6 +1,5 @@
 {
   "LibreWolf": {
-    "dnf": "librewolf",
     "flathub": "io.gitlab.librewolf-community"
   },
   "Firefox": {
@@ -11,10 +10,18 @@
     "flathub": "com.brave.Browser"
   },
   "Chromium": {
-    "dnf": "chromium",
     "flathub": "org.chromium.Chromium"
   },
   "Chrome": {
-    "dnf": "google-chrome-stable"
+    "flathub": "com.google.Chrome"
+  },
+  "Opera": {
+    "flathub": "com.opera.Opera"
+  },
+  "Vivaldi": {
+    "flathub": "com.vivaldi.Vivaldi"
+  },
+  "Zen": {
+    "flathub": "app.zen_browser.zen"
   }
 }

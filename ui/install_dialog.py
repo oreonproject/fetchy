@@ -40,6 +40,6 @@ class InstallDialog(QDialog):
                 text=True,
                 check=True
             )
-            self.output_box.append("✅ Success:\n" + result.stdout)
+            self.output_box.append("Success:\n" + result.stdout)
         except subprocess.CalledProcessError as e:
-            self.output_box.append("❌ Error:\n" + e.stderr)
+            self.output_box.append("Error:\n" + e.stderr)
