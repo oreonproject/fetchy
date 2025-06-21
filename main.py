@@ -15,84 +15,17 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import json
 import os
-import subprocess
+
 
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QLabel, QFrame, QVBoxLayout, QScrollArea,
-    QHBoxLayout, QComboBox, QPushButton, QDialog, QTextEdit
+    QApplication, QWidget, QLabel, QVBoxLayout, QScrollArea,
+    QComboBox, QPushButton
 )
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import sys
 
-
-class Card(QFrame):
-    def __init__(self, image_path, title, repo, click_handler=None):
-        super().__init__()
-        self.title = title
-        self.repo = repo
-        self.selected = False
-        self.click_handler = click_handler
-
-        self.setFrameShape(QFrame.Box)
-        self.setLineWidth(1)
-        self.setFixedSize(450, 200)
-
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 5, 5, 5)
-        layout.setSpacing(10)
-
-        self.blue_bar = QWidget()
-        self.blue_bar.setFixedWidth(5)
-        self.blue_bar.setStyleSheet("background-color: blue;")
-        self.blue_bar.hide()
-        layout.addWidget(self.blue_bar)
-
-        pixmap = QPixmap(image_path)
-        if pixmap.isNull():
-            print(f"Error loading image: {image_path}")
-        else:
-            pixmap = pixmap.scaled(
-                140, 140,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
-            )
-
-        self.image_label = QLabel()
-        self.image_label.setPixmap(pixmap)
-        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.image_label)
-
-        self.title_label = QLabel(title)
-        self.title_label.setStyleSheet("font-weight: bold")
-        self.title_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(self.title_label)
-
-        self.setLayout(layout)
-
-    def mousePressEvent(self, event):
-        if self.click_handler and self.isEnabled():
-            self.click_handler(self)
-
-    def set_selected(self, selected: bool):
-        self.selected = selected
-        self.update_style()
-
-    def update_style(self):
-        self.blue_bar.setVisible(self.selected)
-
-    def set_enabled(self, enabled: bool):
-        self.setEnabled(enabled)
-        if enabled:
-            self.title_label.setStyleSheet("font-weight: bold; color: black;")
-            self.image_label.setGraphicsEffect(None)
-        else:
-            self.title_label.setStyleSheet("font-weight: bold; color: gray;")
-            from PyQt5.QtWidgets import QGraphicsOpacityEffect
-            opacity_effect = QGraphicsOpacityEffect()
-            opacity_effect.setOpacity(0.4)
-            self.image_label.setGraphicsEffect(opacity_effect)
-
+from ui.card import Card
+from ui.install_dialog import InstallDialog
 
 with open("package-names.json", "r") as f:
     data = json.load(f)
@@ -225,34 +158,10 @@ class MainWindow(QWidget):
 
         print(f"Script written to {script_path}. Launching with pkexec...")
 
-        # Show output in PyQt dialog
         dlg = InstallDialog(script_path)
         dlg.exec_()
 
-class InstallDialog(QDialog):
-    def __init__(self, script_path):
-        super().__init__()
-        self.setWindowTitle("Installing Packages")
-        self.resize(600, 400)
 
-        layout = QVBoxLayout(self)
-        self.output_box = QTextEdit()
-        self.output_box.setReadOnly(True)
-        layout.addWidget(self.output_box)
-
-        self.run_script(script_path)
-
-    def run_script(self, script_path):
-        try:
-            result = subprocess.run(
-                ["pkexec", "bash", script_path],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            self.output_box.append("✅ Success:\n" + result.stdout)
-        except subprocess.CalledProcessError as e:
-            self.output_box.append("❌ Error:\n" + e.stderr)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
